@@ -1,0 +1,3 @@
+[submodule "WESEffectsDiD"]
+	path = WESEffectsDiD
+	url = https://github.com/bscavillo/WESEffectsDiD.git
