@@ -33,6 +33,34 @@ Data Sources
    Coverage: reference years 2017-2023 (ABS began 2017; 2024+ not yet released).
    Together with ASE (2014-2016), this gives an unbroken annual series 2014-2023.
 
+PSTS Measure — Cross-Country Comparability (IMPORTANT)
+======================================================
+  BusinessOwnersPSTS (in the female/male rows of the long-format output) is an
+  EMPLOYER-FIRM count (FIRMPDEMP: firms
+  with at least one paid employee), classified by majority-owner sex. This is a
+  fundamentally different construct from the self-employed-PERSONS counts used
+  for Canada (StatCan LFS "Self-employed" in PSTS) and Mexico (ENOE persons with
+  pos_ocu in {employer, own-account}). Specifically, the US series:
+    - counts FIRMS, not persons;
+    - includes ONLY employer firms (with paid employees) — it excludes
+      own-account / non-employer businesses, which dominate self-employment;
+    - is attributed by majority-owner sex, not the individual's own sex.
+  It therefore CANNOT be relabeled as "self-employed persons" to match the other
+  countries. The column name is deliberately kept as BusinessOwnersPSTS (NOT
+  renamed to the standardized Self_Employed used for Mexico/Canada) so the
+  differing construct stays visible in the schema.
+
+  Why not source US self-employed PERSONS directly? A comparable
+  state x sex x PSTS-industry self-employed-persons series is not reliably
+  available from the US statistical agencies. The only microdata crossing
+  class-of-worker x detailed-industry x sex x state is ACS PUMS, where the
+  female-PSTS-self-employed cell is so small per state-year that estimates are
+  dominated by sampling error and frequent suppression. Obtaining the same
+  information the other national statistics offices (INEGI, StatCan) publish
+  directly is thus prohibitively difficult and unreliable, so the ABS/ASE
+  employer-firm proxy is retained by design and flagged here and in the
+  validation report.
+
 B23001 Table Structure (verified against Census variables API)
 ==============================================================
 Male header: var 002
@@ -50,7 +78,11 @@ Female header: var 088 (= 002 + 1 + 10×7 + 3×5 = 002+86)
 
 Output
 ======
-  us_data/aggregatedData.csv         — state × year panel (1 row per state per year)
+  us_data/aggregatedData.csv         — long panel (1 row per State x Year x Sex),
+                                       mirroring the Canadian StatCan layout
+                                       (State, Year, Sex, LaborForce,
+                                        UnemploymentRate, Employed, Unemployed,
+                                        BusinessOwnersPSTS)
   us_data/data_validation_report.md  — validation checks and known data-gap notes
   us_data/scraper.log                — full API call log
 """
@@ -71,7 +103,10 @@ CENSUS_API_KEY = os.getenv("CENSUS_API_KEY")
 if not CENSUS_API_KEY:
     raise ValueError("CENSUS_API_KEY not found in .env file")
 
-OUT_DIR = Path("us_data")
+# Data lives in <repo-root>/us_data, while this scraper now sits in <repo-root>/us.
+# Resolve OUT_DIR relative to this file so the scraper writes to the same data
+# folder no matter which working directory it is launched from.
+OUT_DIR = Path(__file__).resolve().parent.parent / "us_data"
 OUT_DIR.mkdir(exist_ok=True)
 
 logging.basicConfig(
@@ -370,15 +405,11 @@ def build_panel() -> pd.DataFrame:
         panel["male_business_owners_psts"]   = np.nan
         panel["female_business_owners_psts"] = np.nan
 
-    panel["male_unemployment_rate"]   = panel["male_unemployed"]   / panel["male_labor_force"]
-    panel["female_unemployment_rate"] = panel["female_unemployed"] / panel["female_labor_force"]
-
     cols = [
         "state", "year",
         "male_employed", "female_employed",
         "male_unemployed", "female_unemployed",
         "male_labor_force", "female_labor_force",
-        "male_unemployment_rate", "female_unemployment_rate",
         "male_business_owners_psts", "female_business_owners_psts",
     ]
     # Ensure all expected columns exist even if a source was entirely unavailable
@@ -388,6 +419,38 @@ def build_panel() -> pd.DataFrame:
 
     return panel[cols].sort_values(["state", "year"]).reset_index(drop=True)
 
+
+def to_long(panel: pd.DataFrame) -> pd.DataFrame:
+    """Reshape the internal wide panel into the long (one row per State-Year-Sex)
+    layout that mirrors the Canadian StatCan dataset (Province, Year, Sex, ...).
+
+    Conventions matched to the Canadian reference data:
+      - one row per State x Year x Sex, Sex in {"Male", "Female"};
+      - counts (LaborForce, Employed, Unemployed) as raw persons;
+      - UnemploymentRate as a percentage rounded to the nearest tenth
+        (derived as Unemployed / LaborForce; the ACS does not publish a
+        state x sex unemployment rate directly — see validation report).
+    The PSTS column keeps the US-specific name BusinessOwnersPSTS (employer
+    FIRMS, not self-employed persons) to flag the different construct.
+    """
+    frames = []
+    for sex_label, p in (("Male", "male"), ("Female", "female")):
+        rate = (panel[f"{p}_unemployed"] / panel[f"{p}_labor_force"] * 100).round(1)
+        frames.append(pd.DataFrame({
+            "State": panel["state"],
+            "Year": panel["year"],
+            "Sex": sex_label,
+            "LaborForce": panel[f"{p}_labor_force"],
+            "UnemploymentRate": rate,
+            "Employed": panel[f"{p}_employed"],
+            "Unemployed": panel[f"{p}_unemployed"],
+            "BusinessOwnersPSTS": panel[f"{p}_business_owners_psts"],
+        }))
+
+    long = pd.concat(frames, ignore_index=True)
+    long["Sex"] = pd.Categorical(long["Sex"], categories=["Male", "Female"], ordered=True)
+    return long.sort_values(["State", "Year", "Sex"]).reset_index(drop=True)
+
 # ── Validation ─────────────────────────────────────────────────────────────────
 
 def validate(panel: pd.DataFrame) -> None:
@@ -395,22 +458,26 @@ def validate(panel: pd.DataFrame) -> None:
 
     # Shape
     lines.append("## Shape\n\n")
+    lines.append("This dataset is in **long format** (one row per State x Year x Sex), "
+                 "mirroring the Canadian StatCan reference layout.\n\n")
     lines.append(f"| Metric | Value |\n|--------|-------|\n")
     lines.append(f"| Rows | {len(panel)} |\n")
-    lines.append(f"| Unique states | {panel['state'].nunique()} |\n")
-    lines.append(f"| Unique years | {panel['year'].nunique()} |\n\n")
+    lines.append(f"| Unique states | {panel['State'].nunique()} |\n")
+    lines.append(f"| Unique years | {panel['Year'].nunique()} |\n")
+    lines.append(f"| Sex categories | {', '.join(map(str, panel['Sex'].cat.categories))} |\n\n")
 
-    # Missing state-year combinations
-    expected = {(s, y) for s in FIPS_TO_STATE.values() for y in ALL_YEARS}
-    found    = set(zip(panel["state"], panel["year"]))
+    # Missing state-year-sex combinations
+    expected = {(s, y, x) for s in FIPS_TO_STATE.values()
+                for y in ALL_YEARS for x in ("Male", "Female")}
+    found    = set(zip(panel["State"], panel["Year"], panel["Sex"].astype(str)))
     missing  = sorted(expected - found)
-    lines.append(f"## Missing State-Year Combinations\n\n- Count: **{len(missing)}**\n")
+    lines.append(f"## Missing State-Year-Sex Combinations\n\n- Count: **{len(missing)}**\n")
     if missing:
-        lines.append("- Missing: " + ", ".join(f"{s}/{y}" for s, y in missing) + "\n")
+        lines.append("- Missing: " + ", ".join(f"{s}/{y}/{x}" for s, y, x in missing) + "\n")
     lines.append("\n")
 
     # Duplicates
-    dupes = panel.duplicated(subset=["state", "year"]).sum()
+    dupes = panel.duplicated(subset=["State", "Year", "Sex"]).sum()
     lines.append(f"## Duplicate Rows\n\n- Count: **{int(dupes)}**\n\n")
 
     # Missing values
@@ -424,12 +491,12 @@ def validate(panel: pd.DataFrame) -> None:
 
     # Rate consistency
     lines.append("## Unemployment Rate Consistency\n\n")
-    lines.append("Checks stored rate ≈ unemployed / labor_force (tolerance 1e-6).\n\n")
-    for sex in ("male", "female"):
-        computed = panel[f"{sex}_unemployed"] / panel[f"{sex}_labor_force"]
-        bad = int((panel[f"{sex}_unemployment_rate"] - computed).abs().gt(1e-6).sum())
-        lines.append(f"- **{sex.capitalize()}**: {bad} inconsistent rows\n")
-    lines.append("\n")
+    lines.append("UnemploymentRate is derived as 100 x Unemployed / LaborForce and rounded "
+                 "to the nearest tenth. Check below confirms stored rate matches that formula "
+                 "(tolerance 0.05 pp, i.e. half the rounding step).\n\n")
+    computed = (panel["Unemployed"] / panel["LaborForce"] * 100).round(1)
+    bad = int((panel["UnemploymentRate"] - computed).abs().gt(0.05).sum())
+    lines.append(f"- Inconsistent rows: **{bad}**\n\n")
 
     # Known gaps
     lines.append("## Known Data Availability Gaps\n\n")
@@ -450,6 +517,19 @@ def validate(panel: pd.DataFrame) -> None:
         ("PSTS 2024–2025",
          "ABS 2024+ data not yet available via Census API as of June 2026 "
          "(typical publication lag: 18-24 months). Coverage is 2014-2023 via ASE+ABS."),
+        ("PSTS measure is employer FIRMS, not self-employed persons (cross-country caveat)",
+         "BusinessOwnersPSTS is FIRMPDEMP — employer firms (with paid "
+         "employees) by majority-owner sex — NOT a count of self-employed persons. It is "
+         "therefore NOT directly comparable to Canada's StatCan 'Self-employed' persons "
+         "in PSTS (Self_Employed) or Mexico's ENOE self-employed persons, and it excludes "
+         "own-account / non-employer businesses. The column deliberately keeps the name "
+         "BusinessOwnersPSTS (rather than the standardized Self_Employed used for "
+         "Mexico/Canada) to flag this different construct. A comparable US "
+         "self-employed-PERSONS series by state x sex x PSTS industry is not reliably "
+         "available: the only such microdata (ACS PUMS) yields female-PSTS cells too "
+         "small to be reliable (heavy sampling error and suppression), so obtaining the "
+         "information INEGI/StatCan publish directly is prohibitively difficult. The "
+         "employer-firm proxy is retained by design."),
     ]
     for title, desc in gaps:
         lines.append(f"### {title}\n\n{desc}\n\n")
@@ -463,10 +543,11 @@ def validate(panel: pd.DataFrame) -> None:
 if __name__ == "__main__":
     log.info("Starting US state-year panel build (2014-2025)")
     panel = build_panel()
+    long = to_long(panel)
 
     out = OUT_DIR / "aggregatedData.csv"
-    panel.to_csv(out, index=False)
-    log.info("Saved %d rows → %s", len(panel), out)
+    long.to_csv(out, index=False)
+    log.info("Saved %d rows → %s", len(long), out)
 
-    validate(panel)
+    validate(long)
     log.info("Done.")

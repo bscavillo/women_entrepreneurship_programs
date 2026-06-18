@@ -63,14 +63,18 @@ PSTS Sector Proxy
                   (exact equivalent of US NAICS 54).
   This is consistent across the old ENOE, ETOE, and ENOE N / current ENOE.
 
-Business Owners Proxy (male_business_owners_psts / female_business_owners_psts)
-================================================================================
-  Sum of expansion-weighted individuals in PSTS sector with
-  pos_ocu ∈ {2 (employer), 3 (self-employed)}.
-  Note: Unlike the US ABS/ASE which counts employer-owned *firms*, ENOE
-  counts *persons* who own or operate a business.  The series is directly
-  comparable across Mexican states and years but uses a different unit than
-  the US counterpart.
+PSTS Self-Employed (SelfEmployedPSTS)
+=====================================
+  Sum of expansion-weighted individuals in the PSTS sector with
+  pos_ocu ∈ {2 (employer / patrón), 3 (own-account / cuenta propia)} — i.e. the
+  TOTAL self-employed in PSTS.  This matches the Canadian StatCan "Self-employed"
+  class (which also spans both with-paid-help and own-account workers), enabling a
+  like-for-like Canada–Mexico comparison.
+  The employer vs own-account split is NOT exported: only the all-PSTS total is
+  used in the analysis, so `SelfEmployedPSTS` denotes the TOTAL (not the
+  own-account subset).
+  Note: Unlike the US ABS/ASE which counts employer-owned *firms*, ENOE counts
+  *persons* who own or operate a business — a different unit than the US series.
 
 2020 Special Treatment
 ======================
@@ -83,7 +87,11 @@ Business Owners Proxy (male_business_owners_psts / female_business_owners_psts)
 
 Output
 ======
-  mexico_data/aggregatedData.csv   — state × year panel (32 states × ~11 yrs)
+  mexico_data/aggregatedData.csv   — long panel (1 row per State x Year x Sex),
+                                     mirroring the Canadian StatCan layout
+                                     (State, Year, Sex, LaborForce,
+                                      UnemploymentRate, Employed, Unemployed,
+                                      SelfEmployedPSTS)
   mexico_data/data_validation_report.md
   mexico_data/scraper.log
 """
@@ -109,7 +117,10 @@ except ImportError:
 
 # ── Paths & logging ────────────────────────────────────────────────────────────
 
-OUT_DIR = Path("mexico_data")
+# Data lives in <repo-root>/mexico_data, while this scraper now sits in
+# <repo-root>/mexico. Resolve OUT_DIR relative to this file so the scraper writes
+# to the same data folder no matter which working directory it is launched from.
+OUT_DIR = Path(__file__).resolve().parent.parent / "mexico_data"
 OUT_DIR.mkdir(exist_ok=True)
 
 logging.basicConfig(
@@ -585,17 +596,16 @@ def build_panel() -> pd.DataFrame:
     merged["state"] = merged["ent"].map(ENT_TO_STATE)
     merged = merged.dropna(subset=["state"])
 
-    # ── Derived rates ─────────────────────────────────────────────────────────
-    merged["male_unemployment_rate"]   = (
-        merged["male_unemployed"] / merged["male_labor_force"])
-    merged["female_unemployment_rate"] = (
-        merged["female_unemployed"] / merged["female_labor_force"])
-
-    # ── Business owners = employers + self-employed ───────────────────────────
-    # Column names after renaming: male_psts_employers, male_psts_self_employed
-    merged["male_business_owners_psts"]   = (
+    # ── PSTS self-employed (TOTAL) = employers (patrón) + own-account (cuenta propia)
+    # This total is the measure used in the analysis ("all PSTS") and matches the
+    # Canadian StatCan "Self-employed" class, which likewise includes both
+    # self-employed-with-paid-help and own-account workers.  The employer /
+    # own-account split is computed here only to form the total; it is NOT exported
+    # (we test only the all-PSTS total).  `*_psts_self_employed` in the output
+    # therefore denotes the TOTAL self-employed in PSTS — NOT the own-account subset.
+    merged["male_psts_self_employed_total"]   = (
         merged["male_psts_employers"] + merged["male_psts_self_employed"])
-    merged["female_business_owners_psts"] = (
+    merged["female_psts_self_employed_total"] = (
         merged["female_psts_employers"] + merged["female_psts_self_employed"])
 
     # ── Build full skeleton (state × year) and merge ──────────────────────────
@@ -610,43 +620,102 @@ def build_panel() -> pd.DataFrame:
         "male_employed", "female_employed",
         "male_unemployed", "female_unemployed",
         "male_labor_force", "female_labor_force",
-        "male_unemployment_rate", "female_unemployment_rate",
-        "male_business_owners_psts", "female_business_owners_psts",
-        # Extended PSTS breakdown
-        "male_psts_employers", "female_psts_employers",
-        "male_psts_self_employed", "female_psts_self_employed",
-        "male_psts_workers", "female_psts_workers",
+        # PSTS self-employed = TOTAL (employers + own-account); see note above.
+        # The employer/own-account breakdown is intentionally not exported.
+        "male_psts_self_employed_total", "female_psts_self_employed_total",
     ]
     for c in final_cols:
         if c not in panel.columns:
             panel[c] = np.nan
 
-    return (
-        panel[final_cols].sort_values(["state", "year"]).reset_index(drop=True),
-        len(quarterly_frames),
+    out_panel = (
+        panel[final_cols].sort_values(["state", "year"]).reset_index(drop=True)
+        .rename(columns={
+            "male_psts_self_employed_total":   "male_psts_self_employed",
+            "female_psts_self_employed_total": "female_psts_self_employed",
+        })
     )
+    return (
+        out_panel,
+        sorted((y, q) for y, q, _ in quarterly_frames),
+    )
+
+
+def to_long(panel: pd.DataFrame) -> pd.DataFrame:
+    """Reshape the internal wide panel into the long (one row per State-Year-Sex)
+    layout that mirrors the Canadian StatCan reference dataset.
+
+    Conventions matched to the Canadian reference data:
+      - one row per State x Year x Sex, Sex in {"Male", "Female"};
+      - counts (LaborForce, Employed, Unemployed, SelfEmployedPSTS) as raw
+        ENOE-expanded persons;
+      - UnemploymentRate as a percentage rounded to the nearest tenth, derived
+        as 100 x Unemployed / LaborForce (ENOE does not publish a state x sex
+        annual rate directly at this aggregation — see validation report).
+    SelfEmployedPSTS is the TOTAL self-employed PERSONS in PSTS (employers +
+    own-account), matching the Canadian StatCan "Self-employed" class.
+    """
+    frames = []
+    for sex_label, p in (("Male", "male"), ("Female", "female")):
+        rate = (panel[f"{p}_unemployed"] / panel[f"{p}_labor_force"] * 100).round(1)
+        frames.append(pd.DataFrame({
+            "State": panel["state"],
+            "Year": panel["year"],
+            "Sex": sex_label,
+            "LaborForce": panel[f"{p}_labor_force"],
+            "UnemploymentRate": rate,
+            "Employed": panel[f"{p}_employed"],
+            "Unemployed": panel[f"{p}_unemployed"],
+            "SelfEmployedPSTS": panel[f"{p}_psts_self_employed"],
+        }))
+
+    long = pd.concat(frames, ignore_index=True)
+    long["Sex"] = pd.Categorical(long["Sex"], categories=["Male", "Female"], ordered=True)
+    return long.sort_values(["State", "Year", "Sex"]).reset_index(drop=True)
 
 
 # ── Validation ─────────────────────────────────────────────────────────────────
 
-def validate(panel: pd.DataFrame, quarterly_count: int) -> None:
+def validate(panel: pd.DataFrame, processed_quarters) -> None:
+    """processed_quarters: iterable of (year, quarter) tuples actually tabulated."""
+    processed   = set(processed_quarters)
+    expected_q  = [(y, q) for y in ALL_YEARS for q in (1, 2, 3, 4)]
+    missing_q   = [qq for qq in expected_q if qq not in processed]
+
     lines = ["# Data Validation Report — Mexico\n\n"]
 
-    lines.append("## Shape\n\n| Metric | Value |\n|--------|-------|\n")
+    lines.append("## Shape\n\n")
+    lines.append("This dataset is in **long format** (one row per State x Year x Sex), "
+                 "mirroring the Canadian StatCan reference layout.\n\n")
+    lines.append("| Metric | Value |\n|--------|-------|\n")
     lines.append(f"| Rows | {len(panel)} |\n")
-    lines.append(f"| Unique states | {panel['state'].nunique()} |\n")
-    lines.append(f"| Unique years | {panel['year'].nunique()} |\n")
-    lines.append(f"| Quarterly files processed | {quarterly_count} |\n\n")
+    lines.append(f"| Unique states | {panel['State'].nunique()} |\n")
+    lines.append(f"| Unique years | {panel['Year'].nunique()} |\n")
+    lines.append(f"| Sex categories | {', '.join(map(str, panel['Sex'].cat.categories))} |\n")
+    lines.append(f"| Quarterly files expected | {len(expected_q)} |\n")
+    lines.append(f"| Quarterly files processed | {len(processed)} |\n\n")
 
-    expected = {(s, y) for s in ALL_STATES for y in ALL_YEARS}
-    found    = set(zip(panel["state"], panel["year"]))
-    missing  = sorted(expected - found)
-    lines.append(f"## Missing State-Year Combinations\n\n- Count: **{len(missing)}**\n")
-    if missing:
-        lines.append("- Missing: " + ", ".join(f"{s}/{y}" for s, y in missing) + "\n")
+    lines.append("## Missing Quarters\n\n")
+    lines.append(f"- Count: **{len(missing_q)}** of {len(expected_q)}\n")
+    if missing_q:
+        lines.append("- Missing: " + ", ".join(f"{y} Q{q}" for y, q in missing_q) + "\n")
+    if (2020, 2) in missing_q:
+        lines.append(
+            "- Note: 2020 Q2 is the ETOE telephone survey (COVID-19 substitute). "
+            "Its public release carries no `fac` expansion weight, so it cannot be "
+            "tabulated; the 2020 annual figure is the mean of Q1, Q3 and Q4.\n")
     lines.append("\n")
 
-    dupes = panel.duplicated(subset=["state", "year"]).sum()
+    expected = {(s, y, x) for s in ALL_STATES for y in ALL_YEARS
+                for x in ("Male", "Female")}
+    found    = set(zip(panel["State"], panel["Year"], panel["Sex"].astype(str)))
+    missing  = sorted(expected - found)
+    lines.append(f"## Missing State-Year-Sex Combinations\n\n- Count: **{len(missing)}**\n")
+    if missing:
+        lines.append("- Missing: " + ", ".join(f"{s}/{y}/{x}" for s, y, x in missing) + "\n")
+    lines.append("\n")
+
+    dupes = panel.duplicated(subset=["State", "Year", "Sex"]).sum()
     lines.append(f"## Duplicate Rows\n\n- Count: **{int(dupes)}**\n\n")
 
     lines.append("## Missing Values by Column\n\n")
@@ -658,11 +727,12 @@ def validate(panel: pd.DataFrame, quarterly_count: int) -> None:
     lines.append("\n")
 
     lines.append("## Rate Consistency\n\n")
-    for sex in ("male", "female"):
-        computed = panel[f"{sex}_unemployed"] / panel[f"{sex}_labor_force"]
-        bad = int((panel[f"{sex}_unemployment_rate"] - computed).abs().gt(1e-6).sum())
-        lines.append(f"- **{sex.capitalize()}**: {bad} inconsistent rows\n")
-    lines.append("\n")
+    lines.append("UnemploymentRate is derived as 100 x Unemployed / LaborForce and rounded "
+                 "to the nearest tenth. Check below confirms stored rate matches that formula "
+                 "(tolerance 0.05 pp, i.e. half the rounding step).\n\n")
+    computed = (panel["Unemployed"] / panel["LaborForce"] * 100).round(1)
+    bad = int((panel["UnemploymentRate"] - computed).abs().gt(0.05).sum())
+    lines.append(f"- Inconsistent rows: **{bad}**\n\n")
 
     lines.append("## Known Methodological Notes\n\n")
     notes = [
@@ -686,10 +756,22 @@ def validate(panel: pd.DataFrame, quarterly_count: int) -> None:
          "design after the COVID interruption) and ENOE N → current ENOE (2023). "
          "Core concepts (clase1/clase2/pos_ocu/scian) are defined consistently across "
          "all three, but small level shifts around 2020 should be expected."),
-        ("Business owners (male/female_business_owners_psts)",
-         "Counts ENOE-expanded persons who are employers (patrones, pos_ocu=2) or "
-         "self-employed (cuenta propia, pos_ocu=3) in the PSTS sector. "
-         "Unit is persons, not firms (unlike US ABS/ASE firm counts)."),
+        ("PSTS self-employed (SelfEmployedPSTS)",
+         "Counts ENOE-expanded persons who are employers (patrones, pos_ocu=2) OR "
+         "own-account workers (cuenta propia, pos_ocu=3) in the PSTS sector — i.e. the "
+         "TOTAL self-employed in PSTS. Unit is persons, not firms (unlike the US "
+         "BusinessOwnersPSTS firm counts). This total matches the Canadian StatCan "
+         "'Self-employed' class (which also includes both groups), enabling a "
+         "like-for-like comparison. Only the total is exported (as SelfEmployedPSTS); "
+         "the employer/own-account split is computed internally just to form the "
+         "total. The analysis tests the all-PSTS total only."),
+        ("Long format (mirrors Canadian StatCan layout)",
+         "Output is one row per State x Year x Sex (Sex in {Male, Female}), matching "
+         "the Canadian reference dataset. Counts (LaborForce, Employed, Unemployed, "
+         "SelfEmployedPSTS) are raw ENOE-expanded persons; UnemploymentRate is a "
+         "percentage rounded to the nearest tenth, derived as 100 x Unemployed / "
+         "LaborForce (ENOE does not publish a state x sex annual rate directly at this "
+         "aggregation)."),
     ]
     for title, desc in notes:
         lines.append(f"### {title}\n\n{desc}\n\n")
@@ -703,11 +785,12 @@ def validate(panel: pd.DataFrame, quarterly_count: int) -> None:
 
 if __name__ == "__main__":
     log.info("Starting Mexico state-year panel build (2014–2024)")
-    panel, quarterly_count = build_panel()
+    panel, processed_quarters = build_panel()
+    long = to_long(panel)
 
     out = OUT_DIR / "aggregatedData.csv"
-    panel.to_csv(out, index=False)
-    log.info("Saved %d rows → %s", len(panel), out)
+    long.to_csv(out, index=False)
+    log.info("Saved %d rows → %s", len(long), out)
 
-    validate(panel, quarterly_count)
+    validate(long, processed_quarters)
     log.info("Done.")

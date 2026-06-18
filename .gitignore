@@ -1,1 +1,14 @@
 .env
+CLAUDE.md
+.claude/
+
+# Generated analysis outputs — kept locally, never committed
+*.docx
+*.png
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Python bytecode cache
+__pycache__/
+*.pyc

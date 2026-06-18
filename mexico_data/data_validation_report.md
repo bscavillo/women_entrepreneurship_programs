@@ -2,14 +2,24 @@
 
 ## Shape
 
+This dataset is in **long format** (one row per State x Year x Sex), mirroring the Canadian StatCan reference layout.
+
 | Metric | Value |
 |--------|-------|
-| Rows | 352 |
+| Rows | 704 |
 | Unique states | 32 |
 | Unique years | 11 |
+| Sex categories | Male, Female |
+| Quarterly files expected | 44 |
 | Quarterly files processed | 43 |
 
-## Missing State-Year Combinations
+## Missing Quarters
+
+- Count: **1** of 44
+- Missing: 2020 Q2
+- Note: 2020 Q2 is the ETOE telephone survey (COVID-19 substitute). Its public release carries no `fac` expansion weight, so it cannot be tabulated; the 2020 annual figure is the mean of Q1, Q3 and Q4.
+
+## Missing State-Year-Sex Combinations
 
 - Count: **0**
 
@@ -21,29 +31,20 @@
 
 | Column | Missing (n) | Missing (%) |
 |--------|------------|-------------|
-| state | 0 | 0.0% |
-| year | 0 | 0.0% |
-| male_employed | 0 | 0.0% |
-| female_employed | 0 | 0.0% |
-| male_unemployed | 0 | 0.0% |
-| female_unemployed | 0 | 0.0% |
-| male_labor_force | 0 | 0.0% |
-| female_labor_force | 0 | 0.0% |
-| male_unemployment_rate | 0 | 0.0% |
-| female_unemployment_rate | 0 | 0.0% |
-| male_business_owners_psts | 0 | 0.0% |
-| female_business_owners_psts | 0 | 0.0% |
-| male_psts_employers | 0 | 0.0% |
-| female_psts_employers | 0 | 0.0% |
-| male_psts_self_employed | 0 | 0.0% |
-| female_psts_self_employed | 0 | 0.0% |
-| male_psts_workers | 0 | 0.0% |
-| female_psts_workers | 0 | 0.0% |
+| State | 0 | 0.0% |
+| Year | 0 | 0.0% |
+| Sex | 0 | 0.0% |
+| LaborForce | 0 | 0.0% |
+| UnemploymentRate | 0 | 0.0% |
+| Employed | 0 | 0.0% |
+| Unemployed | 0 | 0.0% |
+| SelfEmployedPSTS | 0 | 0.0% |
 
 ## Rate Consistency
 
-- **Male**: 0 inconsistent rows
-- **Female**: 0 inconsistent rows
+UnemploymentRate is derived as 100 x Unemployed / LaborForce and rounded to the nearest tenth. Check below confirms stored rate matches that formula (tolerance 0.05 pp, i.e. half the rounding step).
+
+- Inconsistent rows: **0**
 
 ## Known Methodological Notes
 
@@ -63,7 +64,11 @@ Telephone substitute during COVID-19. The CSV files are no longer served; the DB
 
 Two methodological breaks exist: old ENOE → ENOE N (2020 Q3, new sample design after the COVID interruption) and ENOE N → current ENOE (2023). Core concepts (clase1/clase2/pos_ocu/scian) are defined consistently across all three, but small level shifts around 2020 should be expected.
 
-### Business owners (male/female_business_owners_psts)
+### PSTS self-employed (SelfEmployedPSTS)
 
-Counts ENOE-expanded persons who are employers (patrones, pos_ocu=2) or self-employed (cuenta propia, pos_ocu=3) in the PSTS sector. Unit is persons, not firms (unlike US ABS/ASE firm counts).
+Counts ENOE-expanded persons who are employers (patrones, pos_ocu=2) OR own-account workers (cuenta propia, pos_ocu=3) in the PSTS sector — i.e. the TOTAL self-employed in PSTS. Unit is persons, not firms (unlike the US BusinessOwnersPSTS firm counts). This total matches the Canadian StatCan 'Self-employed' class (which also includes both groups), enabling a like-for-like comparison. Only the total is exported (as SelfEmployedPSTS); the employer/own-account split is computed internally just to form the total. The analysis tests the all-PSTS total only.
+
+### Long format (mirrors Canadian StatCan layout)
+
+Output is one row per State x Year x Sex (Sex in {Male, Female}), matching the Canadian reference dataset. Counts (LaborForce, Employed, Unemployed, SelfEmployedPSTS) are raw ENOE-expanded persons; UnemploymentRate is a percentage rounded to the nearest tenth, derived as 100 x Unemployed / LaborForce (ENOE does not publish a state x sex annual rate directly at this aggregation).
 
