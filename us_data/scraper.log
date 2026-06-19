@@ -75,3 +75,79 @@
 2026-06-18 12:11:21,640 INFO Saved 1224 rows → us_data\aggregatedData.csv
 2026-06-18 12:11:21,642 INFO Validation report: us_data\data_validation_report.md
 2026-06-18 12:11:21,643 INFO Done.
+2026-06-19 10:58:14,492 INFO Starting US state-year panel build (2014-2023)
+2026-06-19 10:58:14,492 INFO === Fetching ACS 1-year labor force data (B23001) ===
+2026-06-19 10:58:14,493 INFO   ACS year 2014
+2026-06-19 10:58:14,493 INFO GET https://api.census.gov/data/2014/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:16,024 INFO GET https://api.census.gov/data/2014/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:17,468 INFO     → 51 state rows
+2026-06-19 10:58:17,468 INFO   ACS year 2015
+2026-06-19 10:58:17,468 INFO GET https://api.census.gov/data/2015/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:18,964 INFO GET https://api.census.gov/data/2015/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:20,396 INFO     → 51 state rows
+2026-06-19 10:58:20,396 INFO   ACS year 2016
+2026-06-19 10:58:20,396 INFO GET https://api.census.gov/data/2016/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:21,809 INFO GET https://api.census.gov/data/2016/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:23,167 INFO     → 51 state rows
+2026-06-19 10:58:23,167 INFO   ACS year 2017
+2026-06-19 10:58:23,167 INFO GET https://api.census.gov/data/2017/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:24,575 INFO GET https://api.census.gov/data/2017/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:26,008 INFO     → 51 state rows
+2026-06-19 10:58:26,008 INFO   ACS year 2018
+2026-06-19 10:58:26,008 INFO GET https://api.census.gov/data/2018/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:27,472 INFO GET https://api.census.gov/data/2018/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:28,903 INFO     → 51 state rows
+2026-06-19 10:58:28,903 INFO   ACS year 2019
+2026-06-19 10:58:28,903 INFO GET https://api.census.gov/data/2019/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:30,269 INFO GET https://api.census.gov/data/2019/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:31,723 INFO     → 51 state rows
+2026-06-19 10:58:31,723 INFO   ACS year 2020
+2026-06-19 10:58:31,723 INFO GET https://api.census.gov/data/2020/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:32,339 WARNING ACS 2020: HTTP 404 — skipping
+2026-06-19 10:58:32,340 INFO     → skipped/unavailable
+2026-06-19 10:58:32,340 INFO   ACS year 2021
+2026-06-19 10:58:32,340 INFO GET https://api.census.gov/data/2021/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:33,907 INFO GET https://api.census.gov/data/2021/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:35,406 INFO     → 51 state rows
+2026-06-19 10:58:35,407 INFO   ACS year 2022
+2026-06-19 10:58:35,407 INFO GET https://api.census.gov/data/2022/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:36,970 INFO GET https://api.census.gov/data/2022/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:38,427 INFO     → 51 state rows
+2026-06-19 10:58:38,427 INFO   ACS year 2023
+2026-06-19 10:58:38,427 INFO GET https://api.census.gov/data/2023/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:39,926 INFO GET https://api.census.gov/data/2023/acs/acs1  vars=39  geo=state:*  filters=None
+2026-06-19 10:58:41,372 INFO     → 51 state rows
+2026-06-19 10:58:41,372 INFO === Fetching ASE business ownership data (NAICS 54 / PSTS, 2014-2016) ===
+2026-06-19 10:58:41,372 INFO   ASE year 2014
+2026-06-19 10:58:41,372 INFO GET https://api.census.gov/data/2014/ase/csa  vars=2  geo=state:*  filters={'NAICS2012': '54'}
+2026-06-19 10:58:42,719 INFO     → 51 state rows
+2026-06-19 10:58:42,719 INFO   ASE year 2015
+2026-06-19 10:58:42,719 INFO GET https://api.census.gov/data/2015/ase/csa  vars=2  geo=state:*  filters={'NAICS2012': '54'}
+2026-06-19 10:58:44,058 INFO     → 51 state rows
+2026-06-19 10:58:44,059 INFO   ASE year 2016
+2026-06-19 10:58:44,059 INFO GET https://api.census.gov/data/2016/ase/csa  vars=2  geo=state:*  filters={'NAICS2012': '54'}
+2026-06-19 10:58:45,340 INFO     → 51 state rows
+2026-06-19 10:58:45,340 INFO === Fetching ABS business ownership data (NAICS 54 / PSTS, 2017-2023) ===
+2026-06-19 10:58:45,340 INFO   ABS year 2017
+2026-06-19 10:58:45,340 INFO GET https://api.census.gov/data/2017/abscs  vars=2  geo=state:*  filters={'NAICS2017': '54'}
+2026-06-19 10:58:46,599 INFO     → 51 state rows
+2026-06-19 10:58:46,599 INFO   ABS year 2018
+2026-06-19 10:58:46,599 INFO GET https://api.census.gov/data/2018/abscs  vars=2  geo=state:*  filters={'NAICS2017': '54'}
+2026-06-19 10:58:47,902 INFO     → 51 state rows
+2026-06-19 10:58:47,902 INFO   ABS year 2019
+2026-06-19 10:58:47,902 INFO GET https://api.census.gov/data/2019/abscs  vars=2  geo=state:*  filters={'NAICS2017': '54'}
+2026-06-19 10:58:49,238 INFO     → 51 state rows
+2026-06-19 10:58:49,238 INFO   ABS year 2020
+2026-06-19 10:58:49,239 INFO GET https://api.census.gov/data/2020/abscs  vars=2  geo=state:*  filters={'NAICS2017': '54'}
+2026-06-19 10:58:51,030 INFO     → 51 state rows
+2026-06-19 10:58:51,030 INFO   ABS year 2021
+2026-06-19 10:58:51,030 INFO GET https://api.census.gov/data/2021/abscs  vars=2  geo=state:*  filters={'NAICS2017': '54'}
+2026-06-19 10:58:52,849 INFO     → 51 state rows
+2026-06-19 10:58:52,849 INFO   ABS year 2022
+2026-06-19 10:58:52,849 INFO GET https://api.census.gov/data/2022/abscs  vars=2  geo=state:*  filters={'NAICS2022': '54'}
+2026-06-19 10:59:08,617 INFO     → 51 state rows
+2026-06-19 10:59:08,617 INFO   ABS year 2023
+2026-06-19 10:59:08,617 INFO GET https://api.census.gov/data/2023/abscs  vars=2  geo=state:*  filters={'NAICS2022': '54'}
+2026-06-19 10:59:25,195 INFO     → 51 state rows
+2026-06-19 10:59:25,209 INFO Saved 1020 rows → C:\Users\bscav\Documents\uniJena\BA\women_entrepreneurship_programs\us_data\aggregatedData.csv
+2026-06-19 10:59:25,209 INFO Done.

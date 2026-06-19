@@ -6,10 +6,12 @@ This dataset is in **long format** (one row per State x Year x Sex), mirroring t
 
 | Metric | Value |
 |--------|-------|
-| Rows | 1224 |
+| Rows | 1020 |
 | Unique states | 51 |
-| Unique years | 12 |
+| Unique years | 10 |
 | Sex categories | Male, Female |
+
+Coverage is **2014–2023**. No rows are emitted for 2024–2025: neither source (ACS 1-year, ABS) has published those reference years as of June 2026, so rather than carry all-NaN rows the years are omitted from the panel entirely.
 
 ## Missing State-Year-Sex Combinations
 
@@ -26,11 +28,13 @@ This dataset is in **long format** (one row per State x Year x Sex), mirroring t
 | State | 0 | 0.0% |
 | Year | 0 | 0.0% |
 | Sex | 0 | 0.0% |
-| LaborForce | 306 | 25.0% |
-| UnemploymentRate | 306 | 25.0% |
-| Employed | 306 | 25.0% |
-| Unemployed | 306 | 25.0% |
-| BusinessOwnersPSTS | 204 | 16.7% |
+| LaborForce | 102 | 10.0% |
+| UnemploymentRate | 102 | 10.0% |
+| Employed | 102 | 10.0% |
+| Unemployed | 102 | 10.0% |
+| BusinessOwnersPSTS | 0 | 0.0% |
+
+The only remaining missing values are the four labor-force columns for **2020** (one State × Sex grid, 102 rows): the standard 2020 ACS 1-year was suspended, but ABS still publishes 2020 PSTS business owners, so those rows are retained with PSTS present and labor force NaN.
 
 ## Unemployment Rate Consistency
 
@@ -44,17 +48,13 @@ UnemploymentRate is derived as 100 x Unemployed / LaborForce and rounded to the 
 
 Census suspended the standard 2020 ACS 1-year release due to COVID-19 data-collection disruption. These rows contain NaN for all labor-force columns.
 
-### ACS 1-year 2024–2025
+### 2024–2025 omitted from the panel
 
-Not yet published as of June 2026. ACS 1-year estimates are released ~9 months after the reference year.
+Neither source has published these reference years as of June 2026 (ACS 1-year is released ~9 months after the reference year; ABS lags 18–24 months). Because every column would be NaN, no rows are emitted for 2024–2025 — the panel ends at 2023.
 
 ### ASE/ABS PSTS 2014–2023
 
 Business ownership by sex is drawn from two consecutive Census surveys: the Annual Survey of Entrepreneurs (ASE, ase/csa) for 2014-2016, and the Annual Business Survey (ABS, abscs) for 2017-2023. Both use FIRMPDEMP (employer firms with paid employees) and identical SEX coding. ASE uses NAICS2012; ABS uses NAICS2017 (2017-2021) and NAICS2022 (2022-2023). The NAICS 54 industry boundary is stable across all three classifications.
-
-### PSTS 2024–2025
-
-ABS 2024+ data not yet available via Census API as of June 2026 (typical publication lag: 18-24 months). Coverage is 2014-2023 via ASE+ABS.
 
 ### PSTS measure is employer FIRMS, not self-employed persons (cross-country caveat)
 

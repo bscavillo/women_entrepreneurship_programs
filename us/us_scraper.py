@@ -1,7 +1,7 @@
 """
 us_scraper.py
 
-Builds a state-year panel dataset (2014-2025) for the United States.
+Builds a state-year panel dataset (2014-2023) for the United States.
 
 Data Sources
 ============
@@ -136,8 +136,12 @@ FIPS_TO_STATE = {
     "56": "WY",
 }
 
-ALL_YEARS = list(range(2014, 2026))
-ACS_YEARS = list(range(2014, 2024))   # 2024-2025 not yet published
+# Panel spans 2014-2023: 2024-2025 are not yet published by either source
+# (ACS 1-year and ABS), so no skeleton rows are emitted for them. 2020 is kept
+# because ABS publishes PSTS business owners that year even though the standard
+# 2020 ACS 1-year (labor force) was suspended — those labor cells stay NaN.
+ALL_YEARS = list(range(2014, 2024))
+ACS_YEARS = list(range(2014, 2024))   # 2020 standard ACS suspended; 2024-2025 not yet published
 ASE_YEARS = list(range(2014, 2017))   # ASE ran 2014-2016; all three use NAICS2012
 ABS_YEARS = list(range(2017, 2024))   # 2017-2023 confirmed available as of June 2026
 ABS_PSTS_NAICS = "54"
@@ -454,7 +458,7 @@ def to_long(panel: pd.DataFrame) -> pd.DataFrame:
 # ── Entry point ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    log.info("Starting US state-year panel build (2014-2025)")
+    log.info("Starting US state-year panel build (2014-2023)")
     panel = build_panel()
     long = to_long(panel)
 
