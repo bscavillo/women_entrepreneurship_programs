@@ -78,13 +78,13 @@ Female header: var 088 (= 002 + 1 + 10×7 + 3×5 = 002+86)
 
 Output
 ======
-  us_data/aggregatedData.csv         — long panel (1 row per State x Year x Sex),
+  data/us/aggregatedData.csv         — long panel (1 row per State x Year x Sex),
                                        mirroring the Canadian StatCan layout
                                        (State, Year, Sex, LaborForce,
                                         UnemploymentRate, Employed, Unemployed,
                                         BusinessOwnersPSTS)
-  us_data/data_validation_report.md  — validation checks and known data-gap notes
-  us_data/scraper.log                — full API call log
+  data/us/data_validation_report.md  — validation checks and known data-gap notes
+  data/us/scraper.log                — full API call log
 """
 
 import os
@@ -103,17 +103,17 @@ CENSUS_API_KEY = os.getenv("CENSUS_API_KEY")
 if not CENSUS_API_KEY:
     raise ValueError("CENSUS_API_KEY not found in .env file")
 
-# Data lives in <repo-root>/us_data, while this scraper now sits in <repo-root>/us.
+# Data lives in <repo-root>/data/us, while this scraper sits in <repo-root>/us.
 # Resolve OUT_DIR relative to this file so the scraper writes to the same data
 # folder no matter which working directory it is launched from.
-OUT_DIR = Path(__file__).resolve().parent.parent / "us_data"
-OUT_DIR.mkdir(exist_ok=True)
+OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "us"
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler(OUT_DIR / "scraper.log", encoding="utf-8"),
+        logging.FileHandler(OUT_DIR / "scraper.log", mode="w", encoding="utf-8"),
         logging.StreamHandler(),
     ],
 )

@@ -1,0 +1,253 @@
+2026-06-19 11:35:28,203 INFO Starting Mexico state-year panel build (2014–2024)
+2026-06-19 11:35:28,203 INFO === Year 2014 ===
+2026-06-19 11:35:28,203 INFO   Fetching 2014 Q1
+2026-06-19 11:35:28,203 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2014trim1_csv.zip
+2026-06-19 11:35:51,190 INFO     → 25.1 MB
+2026-06-19 11:35:51,190 INFO     Reading CSV SDEMT114.csv
+2026-06-19 11:35:57,571 INFO   [2014 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:35:59,026 INFO   Fetching 2014 Q2
+2026-06-19 11:35:59,026 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2014trim2_csv.zip
+2026-06-19 11:36:15,839 INFO     → 22.8 MB
+2026-06-19 11:36:15,839 INFO     Reading CSV SDEMT214.csv
+2026-06-19 11:36:21,759 INFO   [2014 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:36:23,306 INFO   Fetching 2014 Q3
+2026-06-19 11:36:23,306 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2014trim3_csv.zip
+2026-06-19 11:36:39,772 INFO     → 22.7 MB
+2026-06-19 11:36:39,773 INFO     Reading CSV SDEMT314.csv
+2026-06-19 11:36:45,847 INFO   [2014 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:36:47,371 INFO   Fetching 2014 Q4
+2026-06-19 11:36:47,371 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2014trim4_csv.zip
+2026-06-19 11:37:03,496 INFO     → 22.7 MB
+2026-06-19 11:37:03,497 INFO     Reading CSV SDEMT414.csv
+2026-06-19 11:37:09,744 INFO   [2014 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:37:11,265 INFO === Year 2015 ===
+2026-06-19 11:37:11,265 INFO   Fetching 2015 Q1
+2026-06-19 11:37:11,265 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2015trim1_csv.zip
+2026-06-19 11:37:29,105 INFO     → 25.2 MB
+2026-06-19 11:37:29,106 INFO     Reading CSV SDEMT115.csv
+2026-06-19 11:37:33,243 INFO   [2015 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:37:34,257 INFO   Fetching 2015 Q2
+2026-06-19 11:37:34,257 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2015trim2_csv.zip
+2026-06-19 11:37:50,304 INFO     → 22.8 MB
+2026-06-19 11:37:50,304 INFO     Reading CSV SDEMT215.csv
+2026-06-19 11:37:53,456 INFO   [2015 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:37:54,471 INFO   Fetching 2015 Q3
+2026-06-19 11:37:54,471 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2015trim3_csv.zip
+2026-06-19 11:38:10,435 INFO     → 22.6 MB
+2026-06-19 11:38:10,435 INFO     Reading CSV SDEMT315.csv
+2026-06-19 11:38:13,658 INFO   [2015 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:38:14,672 INFO   Fetching 2015 Q4
+2026-06-19 11:38:14,672 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2015trim4_csv.zip
+2026-06-19 11:38:30,700 INFO     → 22.8 MB
+2026-06-19 11:38:30,701 INFO     Reading CSV SDEMT415.csv
+2026-06-19 11:38:34,499 INFO   [2015 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:38:35,533 INFO === Year 2016 ===
+2026-06-19 11:38:35,534 INFO   Fetching 2016 Q1
+2026-06-19 11:38:35,534 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2016trim1_csv.zip
+2026-06-19 11:38:56,674 INFO     → 29.9 MB
+2026-06-19 11:38:56,674 INFO     Reading CSV SDEMT116.csv
+2026-06-19 11:39:02,765 INFO   [2016 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:39:04,210 INFO   Fetching 2016 Q2
+2026-06-19 11:39:04,210 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2016trim2_csv.zip
+2026-06-19 11:39:23,156 INFO     → 26.8 MB
+2026-06-19 11:39:23,156 INFO     Reading CSV SDEMT216.csv
+2026-06-19 11:39:27,290 INFO   [2016 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:39:28,330 INFO   Fetching 2016 Q3
+2026-06-19 11:39:28,330 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2016trim3_csv.zip
+2026-06-19 11:39:47,229 INFO     → 26.5 MB
+2026-06-19 11:39:47,229 INFO     Reading CSV SDEMT316.csv
+2026-06-19 11:39:52,701 INFO   [2016 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:39:54,213 INFO   Fetching 2016 Q4
+2026-06-19 11:39:54,213 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2016trim4_csv.zip
+2026-06-19 11:40:12,815 INFO     → 26.5 MB
+2026-06-19 11:40:12,815 INFO     Reading CSV SDEMT416.csv
+2026-06-19 11:40:19,673 INFO   [2016 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:40:21,148 INFO === Year 2017 ===
+2026-06-19 11:40:21,148 INFO   Fetching 2017 Q1
+2026-06-19 11:40:21,148 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2017trim1_csv.zip
+2026-06-19 11:40:41,986 INFO     → 29.5 MB
+2026-06-19 11:40:41,986 INFO     Reading CSV SDEMT117.csv
+2026-06-19 11:40:48,255 INFO   [2017 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:40:49,692 INFO   Fetching 2017 Q2
+2026-06-19 11:40:49,692 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2017trim2_csv.zip
+2026-06-19 11:41:08,932 INFO     → 27.0 MB
+2026-06-19 11:41:08,932 INFO     Reading CSV SDEMT217.csv
+2026-06-19 11:41:14,350 INFO   [2017 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:41:15,859 INFO   Fetching 2017 Q3
+2026-06-19 11:41:15,859 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2017trim3_csv.zip
+2026-06-19 11:41:34,657 INFO     → 26.5 MB
+2026-06-19 11:41:34,658 INFO     Reading CSV SDEMT317.csv
+2026-06-19 11:41:38,063 INFO   [2017 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:41:39,076 INFO   Fetching 2017 Q4
+2026-06-19 11:41:39,076 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2017trim4_csv.zip
+2026-06-19 11:41:57,847 INFO     → 26.7 MB
+2026-06-19 11:41:57,847 INFO     Reading CSV SDEMT417.csv
+2026-06-19 11:42:01,062 INFO   [2017 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:42:02,069 INFO === Year 2018 ===
+2026-06-19 11:42:02,069 INFO   Fetching 2018 Q1
+2026-06-19 11:42:02,070 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2018trim1_csv.zip
+2026-06-19 11:42:23,189 INFO     → 29.6 MB
+2026-06-19 11:42:23,190 INFO     Reading CSV SDEMT118.csv
+2026-06-19 11:42:28,608 INFO   [2018 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:42:30,085 INFO   Fetching 2018 Q2
+2026-06-19 11:42:30,086 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2018trim2_csv.zip
+2026-06-19 11:42:49,000 INFO     → 26.8 MB
+2026-06-19 11:42:49,000 INFO     Reading CSV SDEMT218.csv
+2026-06-19 11:42:55,371 INFO   [2018 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:42:56,877 INFO   Fetching 2018 Q3
+2026-06-19 11:42:56,877 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2018trim3_csv.zip
+2026-06-19 11:43:15,560 INFO     → 26.6 MB
+2026-06-19 11:43:15,560 INFO     Reading CSV SDEMT318.csv
+2026-06-19 11:43:21,957 INFO   [2018 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:43:23,417 INFO   Fetching 2018 Q4
+2026-06-19 11:43:23,417 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2018trim4_csv.zip
+2026-06-19 11:43:42,310 INFO     → 26.7 MB
+2026-06-19 11:43:42,310 INFO     Reading CSV SDEMT418.csv
+2026-06-19 11:43:47,513 INFO   [2018 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:43:49,003 INFO === Year 2019 ===
+2026-06-19 11:43:49,003 INFO   Fetching 2019 Q1
+2026-06-19 11:43:49,003 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2019trim1_csv.zip
+2026-06-19 11:44:11,373 INFO     → 31.3 MB
+2026-06-19 11:44:11,373 INFO     Reading CSV sdemt119.csv
+2026-06-19 11:44:18,809 INFO   [2019 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:44:20,329 INFO   Fetching 2019 Q2
+2026-06-19 11:44:20,330 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2019trim2_csv.zip
+2026-06-19 11:44:40,496 INFO     → 28.6 MB
+2026-06-19 11:44:40,496 INFO     Reading CSV sdemt219.csv
+2026-06-19 11:44:47,245 INFO   [2019 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:44:48,778 INFO   Fetching 2019 Q3
+2026-06-19 11:44:48,778 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2019trim3_csv.zip
+2026-06-19 11:45:10,627 INFO     → 31.1 MB
+2026-06-19 11:45:10,628 INFO     Reading CSV sdemt319.csv
+2026-06-19 11:45:16,073 INFO   [2019 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:45:17,605 INFO   Fetching 2019 Q4
+2026-06-19 11:45:17,605 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2019trim4_csv.zip
+2026-06-19 11:45:37,329 INFO     → 28.1 MB
+2026-06-19 11:45:37,329 INFO     Reading CSV sdemt419.csv
+2026-06-19 11:45:44,040 INFO   [2019 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:45:45,571 INFO === Year 2020 ===
+2026-06-19 11:45:45,571 INFO   Fetching 2020 Q1
+2026-06-19 11:45:45,571 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/2020trim1_csv.zip
+2026-06-19 11:46:05,053 INFO     → 27.4 MB
+2026-06-19 11:46:05,053 INFO     Reading CSV ENOE_SDEMT120.csv
+2026-06-19 11:46:11,130 INFO   [2020 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:46:12,680 INFO   Fetching 2020 Q2
+2026-06-19 11:46:12,680 INFO   GET https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_mayo_csv.zip
+2026-06-19 11:46:12,872 INFO     → 0.0 MB
+2026-06-19 11:46:12,872 WARNING   [ETOE mayo] Bad ZIP at https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_mayo_csv.zip
+2026-06-19 11:46:12,872 INFO   GET https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_mayo_cpv2020_dbf.zip
+2026-06-19 11:46:14,733 INFO     → 2.3 MB
+2026-06-19 11:46:14,734 WARNING     dbfread not installed — cannot read DBF files
+2026-06-19 11:46:14,734 WARNING     dbfread not installed — cannot read DBF files
+2026-06-19 11:46:14,734 WARNING   [ETOE mayo] Not available from any URL
+2026-06-19 11:46:14,734 INFO   GET https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_junio_csv.zip
+2026-06-19 11:46:14,927 INFO     → 0.0 MB
+2026-06-19 11:46:14,927 WARNING   [ETOE junio] Bad ZIP at https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_junio_csv.zip
+2026-06-19 11:46:14,927 INFO   GET https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_junio_cpv2020_dbf.zip
+2026-06-19 11:46:17,054 INFO     → 2.7 MB
+2026-06-19 11:46:17,054 WARNING     dbfread not installed — cannot read DBF files
+2026-06-19 11:46:17,054 WARNING     dbfread not installed — cannot read DBF files
+2026-06-19 11:46:17,054 WARNING   [ETOE junio] Not available from any URL
+2026-06-19 11:46:17,054 INFO   GET https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_agosto_csv.zip
+2026-06-19 11:46:17,247 INFO     → 0.0 MB
+2026-06-19 11:46:17,248 WARNING   [ETOE agosto] Bad ZIP at https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_agosto_csv.zip
+2026-06-19 11:46:17,248 INFO   GET https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_agosto_cpv2020_dbf.zip
+2026-06-19 11:46:17,436 INFO     → 0.0 MB
+2026-06-19 11:46:17,436 WARNING   [ETOE agosto] Bad ZIP at https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos/etoe_2020_agosto_cpv2020_dbf.zip
+2026-06-19 11:46:17,436 WARNING   [ETOE agosto] Not available from any URL
+2026-06-19 11:46:17,936 INFO   Fetching 2020 Q3
+2026-06-19 11:46:17,936 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2020_trim3_csv.zip
+2026-06-19 11:46:32,152 INFO     → 19.8 MB
+2026-06-19 11:46:32,153 INFO     Reading CSV ENOEN_SDEMT320.csv
+2026-06-19 11:46:37,640 INFO   [2020 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:46:38,983 INFO   Fetching 2020 Q4
+2026-06-19 11:46:38,983 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2020_trim4_csv.zip
+2026-06-19 11:46:55,240 INFO     → 23.0 MB
+2026-06-19 11:46:55,240 INFO     Reading CSV ENOEN_SDEMT420.csv
+2026-06-19 11:47:01,851 INFO   [2020 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:47:03,279 INFO === Year 2021 ===
+2026-06-19 11:47:03,280 INFO   Fetching 2021 Q1
+2026-06-19 11:47:03,280 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2021_trim1_csv.zip
+2026-06-19 11:47:20,715 INFO     → 24.6 MB
+2026-06-19 11:47:20,716 INFO     Reading CSV ENOEN_SDEMT121.csv
+2026-06-19 11:47:27,524 INFO   [2021 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:47:28,955 INFO   Fetching 2021 Q2
+2026-06-19 11:47:28,955 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2021_trim2_csv.zip
+2026-06-19 11:47:45,900 INFO     → 23.9 MB
+2026-06-19 11:47:45,900 INFO     Reading CSV ENOEN_SDEMT221.csv
+2026-06-19 11:47:52,707 INFO   [2021 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:47:54,189 INFO   Fetching 2021 Q3
+2026-06-19 11:47:54,189 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2021_trim3_csv.zip
+2026-06-19 11:48:17,090 INFO     → 32.6 MB
+2026-06-19 11:48:17,091 INFO     Reading CSV ENOEN_SDEMT321.csv
+2026-06-19 11:48:24,877 INFO   [2021 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:48:26,529 INFO   Fetching 2021 Q4
+2026-06-19 11:48:26,529 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2021_trim4_csv.zip
+2026-06-19 11:48:46,727 INFO     → 27.1 MB
+2026-06-19 11:48:46,727 INFO     Reading CSV ENOEN_SDEMT421.csv
+2026-06-19 11:48:53,710 INFO   [2021 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:48:55,343 INFO === Year 2022 ===
+2026-06-19 11:48:55,343 INFO   Fetching 2022 Q1
+2026-06-19 11:48:55,343 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2022_trim1_csv.zip
+2026-06-19 11:49:14,998 INFO     → 27.7 MB
+2026-06-19 11:49:14,998 INFO     Reading CSV ENOEN_SDEMT122.csv
+2026-06-19 11:49:19,662 INFO   [2022 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:49:21,241 INFO   Fetching 2022 Q2
+2026-06-19 11:49:21,241 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2022_trim2_csv.zip
+2026-06-19 11:49:43,015 INFO     → 30.5 MB
+2026-06-19 11:49:43,015 INFO     Reading CSV ENOEN_SDEMT222.csv
+2026-06-19 11:49:48,462 INFO   [2022 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:49:50,029 INFO   Fetching 2022 Q3
+2026-06-19 11:49:50,029 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2022_trim3_csv.zip
+2026-06-19 11:50:11,217 INFO     → 29.6 MB
+2026-06-19 11:50:11,217 INFO     Reading CSV ENOEN_SDEMT322.csv
+2026-06-19 11:50:18,753 INFO   [2022 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:50:20,294 INFO   Fetching 2022 Q4
+2026-06-19 11:50:20,294 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_n_2022_trim4_csv.zip
+2026-06-19 11:50:41,264 INFO     → 29.7 MB
+2026-06-19 11:50:41,264 INFO     Reading CSV ENOEN_SDEMT422.csv
+2026-06-19 11:50:49,256 INFO   [2022 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:50:50,823 INFO === Year 2023 ===
+2026-06-19 11:50:50,823 INFO   Fetching 2023 Q1
+2026-06-19 11:50:50,823 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_2023_trim1_csv.zip
+2026-06-19 11:51:17,433 INFO     → 37.5 MB
+2026-06-19 11:51:17,433 INFO     Reading CSV ENOE_SDEMT123.csv
+2026-06-19 11:51:25,903 INFO   [2023 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:51:27,596 INFO   Fetching 2023 Q2
+2026-06-19 11:51:27,596 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_2023_trim2_csv.zip
+2026-06-19 11:51:55,580 INFO     → 39.5 MB
+2026-06-19 11:51:55,581 INFO     Reading CSV ENOE_SDEMT223.csv
+2026-06-19 11:52:02,817 INFO   [2023 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:52:04,454 INFO   Fetching 2023 Q3
+2026-06-19 11:52:04,454 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_2023_trim3_csv.zip
+2026-06-19 11:52:33,244 INFO     → 40.9 MB
+2026-06-19 11:52:33,244 INFO     Reading CSV ENOE_SDEMT323.csv
+2026-06-19 11:52:40,520 INFO   [2023 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:52:42,170 INFO   Fetching 2023 Q4
+2026-06-19 11:52:42,170 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_2023_trim4_csv.zip
+2026-06-19 11:53:10,909 INFO     → 40.7 MB
+2026-06-19 11:53:10,910 INFO     Reading CSV ENOE_SDEMT423.csv
+2026-06-19 11:53:17,827 INFO   [2023 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:53:19,315 INFO === Year 2024 ===
+2026-06-19 11:53:19,315 INFO   Fetching 2024 Q1
+2026-06-19 11:53:19,315 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_2024_trim1_csv.zip
+2026-06-19 11:53:45,260 INFO     → 37.0 MB
+2026-06-19 11:53:45,260 INFO     Reading CSV ENOE_SDEMT124.csv
+2026-06-19 11:53:51,937 INFO   [2024 Q1] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:53:53,574 INFO   Fetching 2024 Q2
+2026-06-19 11:53:53,574 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_2024_trim2_csv.zip
+2026-06-19 11:54:18,383 INFO     → 31.8 MB
+2026-06-19 11:54:18,384 INFO     Reading CSV ENOE_SDEMT224.csv
+2026-06-19 11:54:26,089 INFO   [2024 Q2] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:54:27,759 INFO   Fetching 2024 Q3
+2026-06-19 11:54:27,759 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_2024_trim3_csv.zip
+2026-06-19 11:54:58,463 INFO     → 43.3 MB
+2026-06-19 11:54:58,463 INFO     Reading CSV ENOE_SDEMT324.csv
+2026-06-19 11:55:06,335 INFO   [2024 Q3] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:55:07,997 INFO   Fetching 2024 Q4
+2026-06-19 11:55:07,998 INFO   GET https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos/enoe_2024_trim4_csv.zip
+2026-06-19 11:55:38,581 INFO     → 43.4 MB
+2026-06-19 11:55:38,582 INFO     Reading CSV ENOE_SDEMT424.csv
+2026-06-19 11:55:45,697 INFO   [2024 Q4] scian==12 filter applied (SCIAN 54, exact PSTS)
+2026-06-19 11:55:47,470 INFO Saved 704 rows → C:\Users\bscav\Documents\uniJena\BA\women_entrepreneurship_programs\data\mexico\aggregatedData.csv
+2026-06-19 11:55:47,470 INFO Done.

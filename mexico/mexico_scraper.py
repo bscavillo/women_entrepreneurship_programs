@@ -87,13 +87,13 @@ PSTS Self-Employed (SelfEmployedPSTS)
 
 Output
 ======
-  mexico_data/aggregatedData.csv   — long panel (1 row per State x Year x Sex),
+  data/mexico/aggregatedData.csv   — long panel (1 row per State x Year x Sex),
                                      mirroring the Canadian StatCan layout
                                      (State, Year, Sex, LaborForce,
                                       UnemploymentRate, Employed, Unemployed,
                                       SelfEmployedPSTS)
-  mexico_data/data_validation_report.md
-  mexico_data/scraper.log
+  data/mexico/data_validation_report.md
+  data/mexico/scraper.log
 """
 
 import io
@@ -117,17 +117,17 @@ except ImportError:
 
 # ── Paths & logging ────────────────────────────────────────────────────────────
 
-# Data lives in <repo-root>/mexico_data, while this scraper now sits in
+# Data lives in <repo-root>/data/mexico, while this scraper sits in
 # <repo-root>/mexico. Resolve OUT_DIR relative to this file so the scraper writes
 # to the same data folder no matter which working directory it is launched from.
-OUT_DIR = Path(__file__).resolve().parent.parent / "mexico_data"
-OUT_DIR.mkdir(exist_ok=True)
+OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "mexico"
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler(OUT_DIR / "scraper.log", encoding="utf-8"),
+        logging.FileHandler(OUT_DIR / "scraper.log", mode="w", encoding="utf-8"),
         logging.StreamHandler(),
     ],
 )
