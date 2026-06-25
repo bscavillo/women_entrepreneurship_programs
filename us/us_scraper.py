@@ -33,6 +33,17 @@ Data Sources
    Coverage: reference years 2017-2023 (ABS began 2017; 2024+ not yet released).
    Together with ASE (2014-2016), this gives an unbroken annual series 2014-2023.
 
+Disclosure Suppression (FIRMPDEMP_F)
+====================================
+  Both ASE and ABS withhold small/low-quality cells: the API returns FIRMPDEMP=0
+  together with a flag in FIRMPDEMP_F (almost always "S" = "estimate did not meet
+  publication standards"). That 0 is a placeholder, NOT a count of zero employer
+  firms. To avoid recording a misleading zero, every flagged cell is set to NaN
+  (see _suppress_flagged). In the 2014-2023 NAICS-54 state panel this affects 30
+  male/female cells, all in the ABS years (2018-2023), mostly female-owned in
+  small states. They are NaN in the output and documented in the validation
+  report; the analysis notebook drops them from the log-rate model.
+
 PSTS Measure — Cross-Country Comparability (IMPORTANT)
 ======================================================
   BusinessOwnersPSTS (in the female/male rows of the long-format output) is an
@@ -208,6 +219,28 @@ def census_get(year: int, dataset: str, variables: list,
 
     return pd.DataFrame(data[1:], columns=data[0])
 
+
+def _suppress_flagged(df: pd.DataFrame, label: str) -> pd.DataFrame:
+    """Set FIRMPDEMP to NaN wherever the Census disclosure flag FIRMPDEMP_F is set.
+
+    The ABS/ASE API returns a value of 0 for cells it withholds — most commonly
+    flag "S" ("estimate did not meet publication standards"), but also "D"
+    (disclosure), "N"/"X" (not available/applicable). That 0 is a placeholder,
+    NOT a count of zero employer firms, so recording it would be misleading.
+    Per the project's academic-transparency rule (missing is better than
+    misleading) we convert every flagged cell to NaN and log how many. See
+    data/us/data_validation_report.md. If FIRMPDEMP_F is absent the frame is
+    returned unchanged.
+    """
+    if "FIRMPDEMP_F" not in df.columns:
+        return df
+    flagged = df["FIRMPDEMP_F"].notna() & (df["FIRMPDEMP_F"].astype(str).str.strip() != "")
+    n = int(flagged.sum())
+    if n:
+        df.loc[flagged, "FIRMPDEMP"] = np.nan
+        log.info("%s: %d suppressed PSTS cell(s) (FIRMPDEMP_F set) → NaN", label, n)
+    return df
+
 # ── ACS: labor force by sex ────────────────────────────────────────────────────
 
 def fetch_acs_year(year: int):
@@ -271,7 +304,7 @@ def fetch_ase_year(year: int):
     try:
         df = census_get(
             year, "ase/csa",
-            variables=["FIRMPDEMP", "SEX"],
+            variables=["FIRMPDEMP", "FIRMPDEMP_F", "SEX"],
             predicates={"NAICS2012": ABS_PSTS_NAICS},
         )
         time.sleep(0.3)
@@ -283,6 +316,7 @@ def fetch_ase_year(year: int):
         return None
 
     df["FIRMPDEMP"] = pd.to_numeric(df["FIRMPDEMP"], errors="coerce")
+    df = _suppress_flagged(df, f"ASE {year}")
     df["state_abbr"] = df["state"].map(FIPS_TO_STATE)
     df = df.dropna(subset=["state_abbr"])
 
@@ -318,7 +352,7 @@ def fetch_abs_year(year: int):
     try:
         df = census_get(
             year, "abscs",
-            variables=["FIRMPDEMP", "SEX"],
+            variables=["FIRMPDEMP", "FIRMPDEMP_F", "SEX"],
             predicates={naics_var: ABS_PSTS_NAICS},
         )
         time.sleep(0.3)
@@ -330,6 +364,7 @@ def fetch_abs_year(year: int):
         return None
 
     df["FIRMPDEMP"] = pd.to_numeric(df["FIRMPDEMP"], errors="coerce")
+    df = _suppress_flagged(df, f"ABS {year}")
     df["state_abbr"] = df["state"].map(FIPS_TO_STATE)
     df = df.dropna(subset=["state_abbr"])
 
@@ -453,6 +488,10 @@ def to_long(panel: pd.DataFrame) -> pd.DataFrame:
 
     long = pd.concat(frames, ignore_index=True)
     long["Sex"] = pd.Categorical(long["Sex"], categories=["Male", "Female"], ordered=True)
+    # Employer-firm counts are integers; use a nullable integer dtype so the
+    # disclosure-suppressed cells (NaN) render as empty without forcing the whole
+    # column to float (e.g. 943 rather than 943.0).
+    long["BusinessOwnersPSTS"] = long["BusinessOwnersPSTS"].astype("Int64")
     return long.sort_values(["State", "Year", "Sex"]).reset_index(drop=True)
 
 # ── Entry point ────────────────────────────────────────────────────────────────

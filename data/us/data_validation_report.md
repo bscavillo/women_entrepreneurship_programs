@@ -32,9 +32,11 @@ Coverage is **2014–2023**. No rows are emitted for 2024–2025: neither source
 | UnemploymentRate | 102 | 10.0% |
 | Employed | 102 | 10.0% |
 | Unemployed | 102 | 10.0% |
-| BusinessOwnersPSTS | 0 | 0.0% |
+| BusinessOwnersPSTS | 30 | 2.9% |
 
-The only remaining missing values are the four labor-force columns for **2020** (one State × Sex grid, 102 rows): the standard 2020 ACS 1-year was suspended, but ABS still publishes 2020 PSTS business owners, so those rows are retained with PSTS present and labor force NaN.
+The labor-force columns are missing for **2020** (one State × Sex grid, 102 rows): the standard 2020 ACS 1-year was suspended, but ABS still publishes 2020 PSTS business owners, so most of those rows are retained with PSTS present and labor force NaN.
+
+`BusinessOwnersPSTS` is missing for **30** State × Year × Sex cells: these are the Census disclosure-suppressed cells (ABS flag `S`) set to NaN at source — see "PSTS disclosure-suppressed cells" below. Six of the 30 fall in 2020, so those six 2020 rows have *both* labor force and PSTS NaN.
 
 ## Unemployment Rate Consistency
 
@@ -55,6 +57,27 @@ Neither source has published these reference years as of June 2026 (ACS 1-year i
 ### ASE/ABS PSTS 2014–2023
 
 Business ownership by sex is drawn from two consecutive Census surveys: the Annual Survey of Entrepreneurs (ASE, ase/csa) for 2014-2016, and the Annual Business Survey (ABS, abscs) for 2017-2023. Both use FIRMPDEMP (employer firms with paid employees) and identical SEX coding. ASE uses NAICS2012; ABS uses NAICS2017 (2017-2021) and NAICS2022 (2022-2023). The NAICS 54 industry boundary is stable across all three classifications.
+
+### PSTS disclosure-suppressed cells (ABS flag `S`) set to NaN
+
+For small or low-quality cells the Census API returns `FIRMPDEMP = 0` together with a non-empty disclosure flag in `FIRMPDEMP_F` — here always `S` ("estimate did not meet publication standards"). That `0` is a withholding placeholder, **not** a count of zero employer firms. To avoid recording a misleading zero (academic-transparency rule: *missing is better than misleading*), the scraper reads `FIRMPDEMP_F` and sets every flagged cell to **NaN** (`_suppress_flagged`).
+
+This affects **30** male/female State × Year × Sex cells, all in the ABS years and absent from the ASE years (2014-2016):
+
+| Year | Suppressed male/female cells |
+|------|------------------------------|
+| 2018 | 7 |
+| 2019 | 9 |
+| 2020 | 6 |
+| 2021 | 6 |
+| 2022 | 1 |
+| 2023 | 1 |
+
+They are concentrated in small states and are mostly **female-owned** (21 of 30 are Female, 9 Male). Because the suppression is non-random (all post-2018, mostly female, smallest states), it is **not** a neutral missingness: the analysis notebook (`us/main_us.ipynb`) drops these NaN cells from the log-rate model, which removes the lowest-rate treated observations in the post period — a directional selection that should be acknowledged when interpreting the US within-group trend. The US series is descriptive only and is **not** pooled into the Canada–Mexico DDD, so this does not affect the headline estimate.
+
+### Age threshold: 16+ (ACS B23001), not 15+ (ILO standard)
+
+The labor-force variables come from ACS Table B23001, "…FOR THE CIVILIAN NONINSTITUTIONAL POPULATION **16 YEARS AND OVER**." This deviates from the project's 15+ (ILO) specification because the US Census/CPS labor-force universe begins at age 16; a 15+ series is not published. The data are output as-is at 16+. This is a small, systematic difference from the Canadian (StatCan, 15+) and Mexican (ENOE, 15+) panels — the omitted 15-year-olds are a tiny share of the labor force — but it is a genuine cross-country definitional gap and should be noted in the thesis's data-limitations section.
 
 ### PSTS measure is employer FIRMS, not self-employed persons (cross-country caveat)
 
