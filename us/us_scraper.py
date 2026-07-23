@@ -114,9 +114,6 @@ CENSUS_API_KEY = os.getenv("CENSUS_API_KEY")
 if not CENSUS_API_KEY:
     raise ValueError("CENSUS_API_KEY not found in .env file")
 
-# Data lives in <repo-root>/data/us, while this scraper sits in <repo-root>/us.
-# Resolve OUT_DIR relative to this file so the scraper writes to the same data
-# folder no matter which working directory it is launched from.
 OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "us"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -132,7 +129,6 @@ log = logging.getLogger(__name__)
 
 BASE_URL = "https://api.census.gov/data"
 
-# Map numeric FIPS → 2-letter abbreviation for 50 states + DC
 FIPS_TO_STATE = {
     "01": "AL", "02": "AK", "04": "AZ", "05": "AR", "06": "CA",
     "08": "CO", "09": "CT", "10": "DE", "11": "DC", "12": "FL",
@@ -147,41 +143,33 @@ FIPS_TO_STATE = {
     "56": "WY",
 }
 
-# Panel spans 2014-2023: 2024-2025 are not yet published by either source
-# (ACS 1-year and ABS), so no skeleton rows are emitted for them. 2020 is kept
-# because ABS publishes PSTS business owners that year even though the standard
-# 2020 ACS 1-year (labor force) was suspended — those labor cells stay NaN.
 ALL_YEARS = list(range(2014, 2024))
-ACS_YEARS = list(range(2014, 2024))   # 2020 standard ACS suspended; 2024-2025 not yet published
-ASE_YEARS = list(range(2014, 2017))   # ASE ran 2014-2016; all three use NAICS2012
-ABS_YEARS = list(range(2017, 2024))   # 2017-2023 confirmed available as of June 2026
+ACS_YEARS = list(range(2014, 2024))
+ASE_YEARS = list(range(2014, 2017))
+ABS_YEARS = list(range(2017, 2024))
 ABS_PSTS_NAICS = "54"
 # ABS switched from NAICS2017 to NAICS2022 as the industry variable starting with 2022 data.
 ABS_NAICS_VAR = {y: ("NAICS2022" if y >= 2022 else "NAICS2017") for y in ABS_YEARS}
 
 # ── B23001 variable lists (derived from verified Census table structure) ───────
 
-# Male young age groups (16-64): 10 groups × 7 sub-vars, first group starts at 003
-_MALE_YOUNG_STARTS = [3 + i * 7 for i in range(10)]   # 3,10,17,...,66
-# Male old age groups (65+): 3 groups × 5 sub-vars
+_MALE_YOUNG_STARTS = [3 + i * 7 for i in range(10)]
 _MALE_OLD_STARTS = [73, 78, 83]
 
-# Female young age groups: 10 groups × 7 sub-vars, first group starts at 089
-_FEMALE_YOUNG_STARTS = [89 + i * 7 for i in range(10)]  # 89,96,...,152
-# Female old age groups (65+): 3 groups × 5 sub-vars
+_FEMALE_YOUNG_STARTS = [89 + i * 7 for i in range(10)]
 _FEMALE_OLD_STARTS = [159, 164, 169]
 
 def _build_vars(young_starts, old_starts):
     """Return (clf_vars, emp_vars, une_vars) for one sex section of B23001."""
     clf, emp, une = [], [], []
     for s in young_starts:
-        clf.append(f"B23001_{s + 3:03d}E")  # civilian LF
-        emp.append(f"B23001_{s + 4:03d}E")  # employed
-        une.append(f"B23001_{s + 5:03d}E")  # unemployed
+        clf.append(f"B23001_{s + 3:03d}E")
+        emp.append(f"B23001_{s + 4:03d}E")
+        une.append(f"B23001_{s + 5:03d}E")
     for s in old_starts:
-        clf.append(f"B23001_{s + 1:03d}E")  # in_LF (≡ civilian_LF for 65+)
-        emp.append(f"B23001_{s + 2:03d}E")  # employed
-        une.append(f"B23001_{s + 3:03d}E")  # unemployed
+        clf.append(f"B23001_{s + 1:03d}E")
+        emp.append(f"B23001_{s + 2:03d}E")
+        une.append(f"B23001_{s + 3:03d}E")
     return clf, emp, une
 
 
@@ -253,8 +241,8 @@ def fetch_acs_year(year: int):
     disruption). We attempt the standard endpoint; a 404 is expected and logged.
     """
     dataset = "acs/acs1"
-    male_vars   = MALE_CLF_VARS   + MALE_EMP_VARS   + MALE_UNE_VARS    # 13+13+13 = 39
-    female_vars = FEMALE_CLF_VARS + FEMALE_EMP_VARS + FEMALE_UNE_VARS  # 39
+    male_vars   = MALE_CLF_VARS   + MALE_EMP_VARS   + MALE_UNE_VARS
+    female_vars = FEMALE_CLF_VARS + FEMALE_EMP_VARS + FEMALE_UNE_VARS
 
     try:
         df_m = census_get(year, dataset, male_vars)
@@ -320,7 +308,6 @@ def fetch_ase_year(year: int):
     df["state_abbr"] = df["state"].map(FIPS_TO_STATE)
     df = df.dropna(subset=["state_abbr"])
 
-    # SEX "003" = Male-owned, SEX "002" = Female-owned (same convention as ABS)
     male_df   = (df[df["SEX"] == "003"][["state_abbr", "FIRMPDEMP"]]
                  .rename(columns={"state_abbr": "state",
                                   "FIRMPDEMP": "male_business_owners_psts"}))
@@ -368,7 +355,6 @@ def fetch_abs_year(year: int):
     df["state_abbr"] = df["state"].map(FIPS_TO_STATE)
     df = df.dropna(subset=["state_abbr"])
 
-    # SEX "003" = Male-owned, SEX "002" = Female-owned (verified via SEX_LABEL)
     male_df   = (df[df["SEX"] == "003"][["state_abbr", "FIRMPDEMP"]]
                  .rename(columns={"state_abbr": "state",
                                   "FIRMPDEMP": "male_business_owners_psts"}))
@@ -420,7 +406,6 @@ def build_panel() -> pd.DataFrame:
         else:
             log.info("    → skipped/unavailable")
 
-    # Full skeleton: every state × every year in scope
     states = sorted(FIPS_TO_STATE.values())
     panel = pd.DataFrame(
         [(s, y) for s in states for y in ALL_YEARS],
@@ -435,7 +420,6 @@ def build_panel() -> pd.DataFrame:
                     "female_unemployed", "male_labor_force", "female_labor_force"]:
             panel[col] = np.nan
 
-    # Combine ASE (2014-2016) and ABS (2017-2023) into one business-ownership series
     biz_frames = ase_frames + abs_frames
     if biz_frames:
         biz_df = pd.concat(biz_frames, ignore_index=True)
@@ -451,7 +435,6 @@ def build_panel() -> pd.DataFrame:
         "male_labor_force", "female_labor_force",
         "male_business_owners_psts", "female_business_owners_psts",
     ]
-    # Ensure all expected columns exist even if a source was entirely unavailable
     for c in cols:
         if c not in panel.columns:
             panel[c] = np.nan

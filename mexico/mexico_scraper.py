@@ -117,9 +117,6 @@ except ImportError:
 
 # ── Paths & logging ────────────────────────────────────────────────────────────
 
-# Data lives in <repo-root>/data/mexico, while this scraper sits in
-# <repo-root>/mexico. Resolve OUT_DIR relative to this file so the scraper writes
-# to the same data folder no matter which working directory it is launched from.
 OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "mexico"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -171,14 +168,13 @@ ENT_TO_STATE = {
 }
 
 ALL_STATES = sorted(ENT_TO_STATE.values())
-ALL_YEARS  = list(range(2014, 2025))   # 2014–2024
+ALL_YEARS  = list(range(2014, 2025))
 
 # ── URL builders ───────────────────────────────────────────────────────────────
 
 BASE = "https://www.inegi.org.mx/contenidos/programas/enoe/15ymas/microdatos"
 BASE_ETOE = "https://www.inegi.org.mx/contenidos/investigacion/etoe/microdatos"
 
-# ETOE was released per-month; we average the three months to stand in for Q2.
 ETOE_MONTHS = ["mayo", "junio", "agosto"]
 
 
@@ -238,9 +234,8 @@ def _download_bytes(url: str, timeout: int = 300, retries: int = 3) -> bytes | N
             log.info("    → %.1f MB", len(r.content) / 1e6)
             return r.content
         except requests.exceptions.RequestException as exc:
-            # Transient: timeouts, dropped connections, incomplete reads.
             if attempt < retries:
-                wait = 5 * (attempt + 1)   # linear backoff: 5s, 10s, 15s
+                wait = 5 * (attempt + 1)
                 log.warning("    → %s (attempt %d/%d, retrying in %ds)",
                             exc, attempt + 1, retries + 1, wait)
                 time.sleep(wait)
@@ -276,7 +271,6 @@ def _find_csv_in_zip(zf: zipfile.ZipFile, prefix: str) -> pd.DataFrame | None:
                 break
         log.warning("    Could not decode %s with any encoding", name)
 
-    # Fallback: try DBF
     return _find_dbf_in_zip(zf, prefix)
 
 
@@ -333,9 +327,8 @@ def _process_sdem(sdem: pd.DataFrame, label: str) -> pd.DataFrame | None:
     All n_* are expansion-weighted population estimates (sum of fac_tri).
     Returns None if required columns are missing.
     """
-    sdem = sdem.copy()   # avoid SettingWithCopyWarning on temp columns
+    sdem = sdem.copy()
 
-    # ── Resolve column names ──────────────────────────────────────────────────
     c_ent    = _col(sdem, "ent", "ENT", "Ent")
     c_sex    = _col(sdem, "sex", "SEX", "Sex")
     c_cl1    = _col(sdem, "clase1", "CLASE1")
@@ -343,7 +336,6 @@ def _process_sdem(sdem: pd.DataFrame, label: str) -> pd.DataFrame | None:
     c_fac    = _col(sdem, "fac_tri", "FAC_TRI", "fac", "FAC", "factor", "FACTOR")
     c_scian  = _col(sdem, "scian", "SCIAN")
     c_pos    = _col(sdem, "pos_ocu", "POS_OCU")
-    # Universe-filter columns (INEGI: R_DEF=00, C_RES in {1,3}, age 15-98)
     c_rdef   = _col(sdem, "r_def", "R_DEF")
     c_cres   = _col(sdem, "c_res", "C_RES")
     c_eda    = _col(sdem, "eda", "EDA", "edad", "EDAD")
@@ -356,16 +348,10 @@ def _process_sdem(sdem: pd.DataFrame, label: str) -> pd.DataFrame | None:
                     label, missing, list(sdem.columns)[:20])
         return None
 
-    # ── Cast & clean ─────────────────────────────────────────────────────────
     for col in [c_ent, c_sex, c_cl1, c_cl2, c_fac]:
         sdem[col] = pd.to_numeric(sdem[col], errors="coerce")
     sdem = sdem.dropna(subset=[c_ent, c_sex, c_cl1, c_fac])
 
-    # ── Apply INEGI analysis universe ─────────────────────────────────────────
-    # The precoded labor variables (clase1/clase2/pos_ocu/scian) and the fac_tri
-    # weight are only valid for: complete interviews (R_DEF=00), de-jure/usual
-    # residents (C_RES in {1,3}), aged 15-98.  Filtering here matches INEGI's
-    # own published totals.
     if c_rdef is not None:
         rdef_num = pd.to_numeric(sdem[c_rdef], errors="coerce")
         sdem = sdem[rdef_num == 0]
@@ -376,20 +362,13 @@ def _process_sdem(sdem: pd.DataFrame, label: str) -> pd.DataFrame | None:
         eda_num = pd.to_numeric(sdem[c_eda], errors="coerce")
         sdem = sdem[(eda_num >= 15) & (eda_num <= 98)]
 
-    # Normalise entity code to zero-padded 2-char string
     sdem["_ent"] = sdem[c_ent].astype(int).astype(str).str.zfill(2)
     sdem = sdem[sdem["_ent"].isin(ENT_TO_STATE)]
 
-    # ── Labor force & employment ──────────────────────────────────────────────
     in_pea      = sdem[c_cl1] == 1
     is_employed = in_pea & (sdem[c_cl2] == 1)
     is_unemp    = in_pea & (sdem[c_cl2] == 2)
 
-    # ── PSTS sector filter ────────────────────────────────────────────────────
-    # ENOE/ENOE-N variable `scian` is a 21-category SCIAN sector grouping.
-    # Code 12 = "Servicios profesionales, científicos y técnicos" — the exact
-    # equivalent of US NAICS 54.  (Not rama_est2==8, which is the broader
-    # professional+financial+real-estate+corporate+admin bundle, SCIAN 52-56.)
     if c_scian is not None:
         scian_num = pd.to_numeric(sdem[c_scian], errors="coerce")
         in_psts = (scian_num == 12)
@@ -398,10 +377,7 @@ def _process_sdem(sdem: pd.DataFrame, label: str) -> pd.DataFrame | None:
         in_psts = pd.Series(False, index=sdem.index)
         log.warning("  [%s] scian column not found; PSTS counts will be 0", label)
 
-    # ── Employment position in PSTS ───────────────────────────────────────────
     if c_pos is not None:
-        # pos_ocu: 2=Empleadores (employer), 3=Trabajadores por cuenta propia
-        # (self-employed).  (1=subordinate paid, 4=unpaid, 5=unspecified.)
         pos_num = pd.to_numeric(sdem[c_pos], errors="coerce")
         is_employer = is_employed & in_psts & (pos_num == 2)
         is_self_emp = is_employed & in_psts & (pos_num == 3)
@@ -410,7 +386,6 @@ def _process_sdem(sdem: pd.DataFrame, label: str) -> pd.DataFrame | None:
         is_self_emp = pd.Series(False, index=sdem.index)
         log.warning("  [%s] pos_ocu not found; employer/self-emp counts = 0", label)
 
-    # ── Group by state × sex and sum weights ──────────────────────────────────
     sdem["_sex"] = sdem[c_sex].astype(int)
 
     rows = []
@@ -449,22 +424,15 @@ def _fetch_quarter(year: int, quarter: int) -> pd.DataFrame | None:
     """
     label = f"{year} Q{quarter}"
 
-    # Determine which URL(s) to try.
-    # ENOE N ran 2020 Q3 – 2022 Q4; from 2023 Q1 the survey returned to the
-    # classic ENOE name and URL scheme (without the enoe_n_ prefix).
     if year < 2020 or (year == 2020 and quarter == 1):
         urls = [_enoe_url(year, quarter)]
     elif year == 2020 and quarter == 2:
-        # ETOE: not a standard quarterly file — handled separately
         return None
     elif year == 2020 and quarter in (3, 4):
         urls = [_enoe_n_url(year, quarter), _enoe_url(year, quarter)]
     elif year in (2021, 2022):
         urls = [_enoe_n_url(year, quarter)]
     else:
-        # 2023+ : ENOE N ended; survey uses enoe_{year}_trim{q} naming.
-        # Try that first, then the pre-2020 bare and the enoe_n_ patterns as
-        # fallbacks for robustness.
         urls = [
             _enoe_new_url(year, quarter),
             _enoe_url(year, quarter),
@@ -498,8 +466,6 @@ def _fetch_etoe_q2() -> pd.DataFrame | None:
     """
     monthly_frames = []
     for month in ETOE_MONTHS:
-        # Try CSV first, then DBF (ETOE was released primarily as DBF with
-        # a cpv2020 infix; CSV may not exist at all).
         urls_to_try = [
             _etoe_url(month),
             f"{BASE_ETOE}/etoe_2020_{month}_cpv2020_dbf.zip",
@@ -518,7 +484,7 @@ def _fetch_etoe_q2() -> pd.DataFrame | None:
                 log.warning("  [ETOE %s] Bad ZIP at %s", month, url)
                 continue
             if sdem is not None:
-                break   # found usable data, stop trying URLs
+                break
 
         if sdem is None:
             log.warning("  [ETOE %s] Not available from any URL", month)
@@ -531,7 +497,6 @@ def _fetch_etoe_q2() -> pd.DataFrame | None:
     if not monthly_frames:
         return None
 
-    # Average the monthly estimates (treating months as equal-weight sub-periods)
     combined = pd.concat(monthly_frames)
     avg = (combined
            .groupby(["ent", "sex"])
@@ -545,7 +510,7 @@ def _fetch_etoe_q2() -> pd.DataFrame | None:
 # ── Annual aggregation ─────────────────────────────────────────────────────────
 
 def build_panel() -> pd.DataFrame:
-    quarterly_frames = []   # list of (year, quarter, df)
+    quarterly_frames = []
 
     for year in ALL_YEARS:
         log.info("=== Year %d ===", year)
@@ -565,8 +530,6 @@ def build_panel() -> pd.DataFrame:
     if not quarterly_frames:
         raise RuntimeError("No quarterly data was retrieved — check network / URLs.")
 
-    # ── Build annual averages ─────────────────────────────────────────────────
-    # Tag each frame with its year and average across quarters within each year.
     tagged = []
     for year, _q, df in quarterly_frames:
         df = df.copy()
@@ -581,7 +544,6 @@ def build_panel() -> pd.DataFrame:
               .mean()
               .reset_index())
 
-    # ── Pivot sex → separate male / female columns ────────────────────────────
     male   = annual[annual["sex"] == 1].copy().drop(columns="sex")
     female = annual[annual["sex"] == 2].copy().drop(columns="sex")
 
@@ -592,23 +554,14 @@ def build_panel() -> pd.DataFrame:
 
     merged = male.merge(female, on=["ent", "year"], how="outer")
 
-    # ── Map entity code → state name ──────────────────────────────────────────
     merged["state"] = merged["ent"].map(ENT_TO_STATE)
     merged = merged.dropna(subset=["state"])
 
-    # ── PSTS self-employed (TOTAL) = employers (patrón) + own-account (cuenta propia)
-    # This total is the measure used in the analysis ("all PSTS") and matches the
-    # Canadian StatCan "Self-employed" class, which likewise includes both
-    # self-employed-with-paid-help and own-account workers.  The employer /
-    # own-account split is computed here only to form the total; it is NOT exported
-    # (we test only the all-PSTS total).  `*_psts_self_employed` in the output
-    # therefore denotes the TOTAL self-employed in PSTS — NOT the own-account subset.
     merged["male_psts_self_employed_total"]   = (
         merged["male_psts_employers"] + merged["male_psts_self_employed"])
     merged["female_psts_self_employed_total"] = (
         merged["female_psts_employers"] + merged["female_psts_self_employed"])
 
-    # ── Build full skeleton (state × year) and merge ──────────────────────────
     skeleton = pd.DataFrame(
         [(s, y) for s in ALL_STATES for y in ALL_YEARS],
         columns=["state", "year"],
@@ -620,8 +573,6 @@ def build_panel() -> pd.DataFrame:
         "male_employed", "female_employed",
         "male_unemployed", "female_unemployed",
         "male_labor_force", "female_labor_force",
-        # PSTS self-employed = TOTAL (employers + own-account); see note above.
-        # The employer/own-account breakdown is intentionally not exported.
         "male_psts_self_employed_total", "female_psts_self_employed_total",
     ]
     for c in final_cols:
